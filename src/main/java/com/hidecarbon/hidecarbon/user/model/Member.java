@@ -30,8 +30,6 @@ public class Member {
 
     private String userRole;
 
-    private float myCo2e;
-
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -54,13 +52,12 @@ public class Member {
     }
 
     @Builder
-    public Member(String userEmail, String password, String userName, String userImg, String userPhn, String userRole, float myCo2e) {
+    public Member(String userEmail, String password, String userName, String userImg, String userPhn, String userRole) {
         this.userEmail = userEmail;
         this.password = password;
         this.userName = userName;
         this.userImg = userImg;
         this.userPhn = userPhn;
         this.userRole = userRole;
-        this.myCo2e = myCo2e;
     }
 }
