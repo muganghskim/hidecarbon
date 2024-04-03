@@ -20,7 +20,7 @@ public class MissionCompletion {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="userNo")
-    private Member member;
+    private Member normalMember;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="missionNo")
@@ -52,8 +52,8 @@ public class MissionCompletion {
     }
 
     @Builder
-    public MissionCompletion(Member member, Mission mission, LocalDateTime completeDate, float gainCo2e) {
-        this.member = member;
+    public MissionCompletion(Member normalMember, Mission mission, LocalDateTime completeDate, float gainCo2e) {
+        this.normalMember = normalMember;
         this.mission = mission;
         this.completeDate = completeDate;
         this.gainCo2e = gainCo2e;

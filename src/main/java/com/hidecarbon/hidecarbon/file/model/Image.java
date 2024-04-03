@@ -1,4 +1,4 @@
-package com.hidecarbon.hidecarbon.reward.model;
+package com.hidecarbon.hidecarbon.file.model;
 
 import com.hidecarbon.hidecarbon.user.model.Member;
 import jakarta.persistence.*;
@@ -10,23 +10,19 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@Table(name = "UserReward")
+@Table(name = "Image")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserReward {
+public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userRewardNo;
+    private Long imageNo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="userNo")
-    private Member normalMember;
+    private String entityType; // "mission", "reward", "member" 등의 값을 가질 수 있음
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="rewardNo")
-    private Reward reward;
+    private Long entityId; // entityType에 따라 missionNo, rewardNo, userNo 중 하나의 값을 가짐
 
-    private LocalDateTime rewardDate;
+    private String imgPath;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -50,10 +46,9 @@ public class UserReward {
     }
 
     @Builder
-    public UserReward(Member normalMember, Reward reward, LocalDateTime rewardDate) {
-        this.normalMember = normalMember;
-        this.reward = reward;
-        this.rewardDate = rewardDate;
+    public Image(String entityType, Long entityId, String imgPath) {
+        this.entityType = entityType;
+        this.entityId = entityId;
+        this.imgPath = imgPath;
     }
-
 }

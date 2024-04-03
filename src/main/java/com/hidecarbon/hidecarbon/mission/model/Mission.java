@@ -20,7 +20,7 @@ public class Mission {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="userNo")
-    private Member member;
+    private Member adminMember;
 
     private String title;
 
@@ -54,8 +54,8 @@ public class Mission {
     }
 
     @Builder
-    public Mission(Member member, String title, String description, LocalDateTime startDate, LocalDateTime endDate, float co2e) {
-        this.member = member;
+    public Mission(Member adminMember, String title, String description, LocalDateTime startDate, LocalDateTime endDate, float co2e) {
+        this.adminMember = adminMember;
         this.title = title;
         this.description = description;
         this.startDate = startDate;

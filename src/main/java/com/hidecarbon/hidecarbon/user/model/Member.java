@@ -26,8 +26,6 @@ public class Member {
 
     private String userPhn;
 
-    private String userImg;
-
     private String userRole;
 
     @Column(nullable = false, updatable = false)
@@ -52,11 +50,10 @@ public class Member {
     }
 
     @Builder
-    public Member(String userEmail, String password, String userName, String userImg, String userPhn, String userRole) {
+    public Member(String userEmail, String password, String userName, String userPhn, String userRole) {
         this.userEmail = userEmail;
         this.password = password;
         this.userName = userName;
-        this.userImg = userImg;
         this.userPhn = userPhn;
         this.userRole = userRole;
     }

@@ -18,6 +18,7 @@ public class CarbonCredit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long carbonCreditNo;
 
+    // Todo : carboncredit의 주인이 누군지는 설계 방향에 따라 갈릴듯
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="userNo")
     private Member member;

@@ -20,7 +20,7 @@ public class Reward {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="userNo")
-    private Member member;
+    private Member adminMember;
 
     private String description;
 
@@ -50,8 +50,8 @@ public class Reward {
     }
 
     @Builder
-    public Reward(Member member, String description, float reqCo2e, String rewardType) {
-        this.member = member;
+    public Reward(Member adminMember, String description, float reqCo2e, String rewardType) {
+        this.adminMember = adminMember;
         this.description = description;
         this.reqCo2e = reqCo2e;
         this.rewardType = rewardType;
