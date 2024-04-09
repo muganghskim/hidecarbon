@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Repository
@@ -23,26 +25,27 @@ public class CashRepository {
     private String cashKey;
 
     @Autowired
-    @Qualifier("reactiveRedisTemplate")
-    private ReactiveRedisTemplate<Object, Object> template;
+    private RedisTemplate<String, Object> template; // ReactiveRedisTemplate 대신 RedisTemplate 사용
 
-    public <T extends AllDtos> Mono<?> save(String reqKey, T content) {
+    public <T> void save(String reqKey, T content) {
         Map<Long, Object> data = new HashMap<>();
         if (content instanceof MemberCashDto) {
             data.put(((MemberCashDto) content).getUserNo(), content);
         }
-        return template.opsForHash().put(cashKey, reqKey, data);
+        template.opsForHash().put(cashKey, reqKey, data);
+        // 전체 해시에 대해 만료 시간 설정
+        template.expire(cashKey, 3, TimeUnit.DAYS);
     }
 
-    public Flux<Map.Entry<Object, Object>> findAll() {
-        return template.opsForHash().scan(cashKey, ScanOptions.scanOptions().build());
+    public Map<Object, Object> findAll() {
+        return template.opsForHash().entries(cashKey);
     }
 
-    public Mono<Object> get(String reqKey) {
+    public Object get(String reqKey) {
         return template.opsForHash().get(cashKey, reqKey);
     }
 
-    public Mono<Boolean> remove(String reqKey) {
-        return template.opsForHash().remove(cashKey, reqKey).hasElement();
+    public Boolean remove(String reqKey) {
+        return template.opsForHash().delete(cashKey, reqKey) > 0;
     }
 }

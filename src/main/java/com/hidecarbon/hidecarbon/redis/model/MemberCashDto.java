@@ -6,6 +6,8 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Setter
 @Getter
 public class MemberCashDto extends AllDtos {
@@ -13,6 +15,8 @@ public class MemberCashDto extends AllDtos {
     private Long userNo;
 
     private String userEmail;
+
+    private String password;
 
     private String userName;
 

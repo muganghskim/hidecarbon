@@ -9,30 +9,31 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
-@ToString
-@Table(name = "Member")
+@Table(name = "EmailAuth")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
+public class EmailAuth {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userNo;
+    private Long authId;
 
-    private String userEmail;
+    private String email;
 
-    private String password;
+    private String code;
 
-    private String userName;
+    private String verify;
 
-    private String userPhn;
-
-    private String userRole;
-
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
+    private Date expiresAt;
 
     // PrePersist is used before the very first time the object is inserted into the database.
     // This will set both createdAt and updatedAt timestamps to the current time when a new entity is created.
@@ -40,6 +41,7 @@ public class Member {
     protected void onCreate() {
         this.createdAt= LocalDateTime.now();
         this.updatedAt= LocalDateTime.now();
+        this.expiresAt = new Date(System.currentTimeMillis() + 300000);
     }
 
     // PreUpdate is used before any update on the data occurs,
@@ -50,18 +52,10 @@ public class Member {
     }
 
     @Builder
-    public Member(String userEmail, String password, String userName, String userPhn, String userRole) {
-        this.userEmail = userEmail;
-        this.password = password;
-        this.userName = userName;
-        this.userPhn = userPhn;
-        this.userRole = userRole;
-    }
-
-    public Member update(String userName) {
-        if (userName != null) {
-            this.userName = userName;
-        }
-        return this;
+    public EmailAuth(Long authId, String email, String code, String verify) {
+        this.authId = authId;
+        this.email = email;
+        this.code = code;
+        this.verify = verify;
     }
 }
