@@ -1,6 +1,6 @@
 package com.hidecarbon.hidecarbon.user.service;
 
-import com.hidecarbon.hidecarbon.redis.model.MemberCashDto;
+import com.hidecarbon.hidecarbon.user.model.MemberDto;
 import com.hidecarbon.hidecarbon.redis.repository.CashRepository;
 import com.hidecarbon.hidecarbon.security.JwtProvider;
 import com.hidecarbon.hidecarbon.user.model.EmailAuth;
@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -56,7 +57,6 @@ public class UserService {
     }
 
     // 회원가입 : 아이디와 패스워드 닉네임만 저장
-    // todo : 추가정보 처리 ex: role
     public Member signUp(String userEmail, String password, String username) {
         // 중복 회원 확인
         Optional<Member> existingMember = userRepository.findByUserEmail(userEmail);
@@ -69,6 +69,7 @@ public class UserService {
                 .userEmail(userEmail)
                 .password(encodedPassword)
                 .userName(username)
+                .userRole("NORMAL")
                 .build();
         return userRepository.save(member);
     }
@@ -100,23 +101,49 @@ public class UserService {
             log.info("일반 사용자 권한");
         }
 
-//        Optional<Member> memberOpt = userRepository.findByUserEmail(userId);
-//
-//        if(!memberOpt.isPresent()){
-//            throw new RuntimeException("회원을 찾을 수 없습니다.");
-//        }
-//
-//        Member member = memberOpt.get();
+        MemberDto memberCashDto = (MemberDto) cashRepository.get("memberDto::" + username);
 
-        // 토큰, 사용자 이름 및 이메일 리턴
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("token", token);
-        resultMap.put("refreshToken", refreshToken); //리프레시 토큰 추가
-        resultMap.put("username", username);
-        resultMap.put("userId", userId);
-//        resultMap.put("img", member.getUserImg());
+        if (memberCashDto != null) {
+            // 토큰, 사용자 이름 및 이메일 리턴
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("token", token);
+            resultMap.put("refreshToken", refreshToken); //리프레시 토큰 추가
+            resultMap.put("username", username);
+            resultMap.put("userId", userId);
+            resultMap.put("img", memberCashDto.getImgPath());
 
-        return resultMap;
+            return resultMap;
+        } else{
+            Optional<Member> memberOpt = userRepository.findByUserEmail(userId);
+
+            if(!memberOpt.isPresent()){
+                throw new RuntimeException("회원을 찾을 수 없습니다.");
+            }
+
+            Member member = memberOpt.get();
+
+            // 레디스 저장
+            MemberDto dto = new MemberDto();
+            dto.setUserEmail(member.getUserEmail());
+            dto.setUserNo(member.getUserNo());
+            dto.setPassword(member.getPassword());
+            dto.setUserPhn(member.getUserPhn());
+            dto.setImgPath(member.getImgPath());
+            dto.setUserName(member.getUserName());
+            dto.setUserRole(member.getUserRole());
+
+            cashRepository.save("memberDto::" + username, dto,3, TimeUnit.DAYS);
+
+            // 토큰, 사용자 이름 및 이메일 리턴
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("token", token);
+            resultMap.put("refreshToken", refreshToken); //리프레시 토큰 추가
+            resultMap.put("username", username);
+            resultMap.put("userId", userId);
+            resultMap.put("img", member.getImgPath());
+
+            return resultMap;
+        }
     }
 
     // 프로필 관리
@@ -126,7 +153,6 @@ public class UserService {
     }
 
     // 프로필 업데이트
-    // todo : 레디스 동기화
     public void updateProfile(String userEmail, String newUsername, String newUserPhn, String file) {
         Optional<Member> memberOpt = userRepository.findByUserEmail(userEmail);
         if (!memberOpt.isPresent()) {
@@ -141,8 +167,20 @@ public class UserService {
             member.setUserPhn(newUserPhn);
         }
         if (file != null) {
-//            member.setUserImg(file);
+            member.setImgPath(file);
         }
+
+        // 레디스 동기화
+        MemberDto dto = new MemberDto();
+        dto.setUserEmail(member.getUserEmail());
+        dto.setUserNo(member.getUserNo());
+        dto.setPassword(member.getPassword());
+        dto.setUserPhn(newUserPhn);
+        dto.setImgPath(file);
+        dto.setUserName(newUsername);
+        dto.setUserRole(member.getUserRole());
+
+        cashRepository.save("memberDto::" + userEmail, dto, 3, TimeUnit.DAYS);
 
         userRepository.save(member);
     }
@@ -241,8 +279,8 @@ public class UserService {
         else return false;
     }
 
-    public String simpleLogin(String userEmail) {
-        MemberCashDto memberCashDto = (MemberCashDto) cashRepository.get(userEmail + "MemberCashDto");
+    public String simpleLogin(String userEmail, String userImg) {
+        MemberDto memberCashDto = (MemberDto) cashRepository.get("memberDto::" + userEmail);
 
         if (memberCashDto != null) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(memberCashDto.getUserEmail(), null, Collections.singleton(new SimpleGrantedAuthority(memberCashDto.getUserRole())));
@@ -254,15 +292,16 @@ public class UserService {
             Member member = optionalMember.get();
 
             // 레디스 저장
-            MemberCashDto dto = new MemberCashDto();
+            MemberDto dto = new MemberDto();
             dto.setUserEmail(member.getUserEmail());
             dto.setUserNo(member.getUserNo());
             dto.setPassword(member.getPassword());
             dto.setUserPhn(member.getUserPhn());
+            dto.setImgPath(userImg);
             dto.setUserName(member.getUserName());
             dto.setUserRole(member.getUserRole());
 
-            cashRepository.save(userEmail + "MemberCashDto", dto);
+            cashRepository.save("memberDto::" + userEmail, dto, 3, TimeUnit.DAYS);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(member.getUserEmail(), null, Collections.singleton(new SimpleGrantedAuthority(member.getUserRole())));
             return jwtProvider.generateToken(authentication);

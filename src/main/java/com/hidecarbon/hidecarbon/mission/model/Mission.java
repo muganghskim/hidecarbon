@@ -32,6 +32,8 @@ public class Mission {
 
     private float co2e;
 
+    private String imgPath;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -54,12 +56,13 @@ public class Mission {
     }
 
     @Builder
-    public Mission(Member adminMember, String title, String description, LocalDateTime startDate, LocalDateTime endDate, float co2e) {
+    public Mission(Member adminMember, String title, String description, LocalDateTime startDate, LocalDateTime endDate, float co2e, String imgPath) {
         this.adminMember = adminMember;
         this.title = title;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
         this.co2e = co2e;
+        this.imgPath = imgPath;
     }
 }

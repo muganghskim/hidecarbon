@@ -1,5 +1,6 @@
 package com.hidecarbon.hidecarbon.user.controller;
 
+import com.hidecarbon.hidecarbon.file.service.StorageService;
 import com.hidecarbon.hidecarbon.user.model.Member;
 import com.hidecarbon.hidecarbon.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,9 +29,12 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
 
+    private final StorageService storageService;
+
     @Autowired
-    public UserController(UserService userService){
+    public UserController(UserService userService, StorageService storageService){
         this.userService = userService;
+        this.storageService = storageService;
     }
 
     @Data
@@ -140,7 +144,7 @@ public class UserController {
 //        }
 //    }
 
-    //Todo : 이미지 테이블에 저장하는걸로 바꿈
+
     @PostMapping("/profile/update")
     @Operation(summary = "프로필 업데이트")
     public ResponseEntity<?> updateProfile(@RequestPart String userEmail,
@@ -148,8 +152,8 @@ public class UserController {
                                            @RequestPart String userPhn,
                                            @RequestPart(value = "file") MultipartFile file) {
         try {
-//            String storedFileUrl = storageService.storeFile(file);
-//            userService.updateProfile(userEmail, userName, userPhn, storedFileUrl);
+            String storedFileUrl = storageService.storeFile(file);
+            userService.updateProfile(userEmail, userName, userPhn, storedFileUrl);
             return ResponseEntity.ok("200");
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -233,7 +237,7 @@ public class UserController {
     public void getLoginInfo(HttpServletResponse response, OAuth2AuthenticationToken token) throws IOException {
         String userEmail = token.getPrincipal().getAttribute("email");
         String userImg = token.getPrincipal().getAttribute("picture");
-        String jwt = userService.simpleLogin(userEmail);
+        String jwt = userService.simpleLogin(userEmail, userImg);
 
         // Redirect to the client app with the JWT token as a URL parameter
         response.sendRedirect("http://localhost:5173/loginSuccess?token=" + URLEncoder.encode(jwt, "UTF-8") + "&email=" + userEmail + "&img=" + userImg);

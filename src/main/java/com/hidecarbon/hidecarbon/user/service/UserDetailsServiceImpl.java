@@ -1,7 +1,7 @@
 package com.hidecarbon.hidecarbon.user.service;
 
 
-import com.hidecarbon.hidecarbon.redis.model.MemberCashDto;
+import com.hidecarbon.hidecarbon.user.model.MemberDto;
 import com.hidecarbon.hidecarbon.redis.repository.CashRepository;
 import com.hidecarbon.hidecarbon.user.model.Member;
 import com.hidecarbon.hidecarbon.user.repository.UserRepository;
@@ -13,12 +13,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -35,7 +34,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     /*
-        Todo : 캐시 만료처리 완료, 레디스 자동 재연결 로직 완료
+
+        Todo : 캐시 만료처리 완료, 레디스 자동 재연결 로직 완료, 비밀번호는 암호화되어 캐싱됨 -> 토큰을 저장
         동기화: Redis 캐시와 데이터베이스 간의 정보가 동기화되어 있어야 합니다. 사용자 정보가 변경되면 캐시도 업데이트되어야 합니다.
         예를 들어, 사용자의 비밀번호가 변경되거나, 권한이 업데이트되는 경우 캐시에 저장된 정보도 함께 업데이트되어야 합니다.
 
@@ -54,7 +54,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         log.info("username: {}", username);
         // Redis에서 사용자 정보 조회 시도
-        MemberCashDto memberCashDto = (MemberCashDto) cashRepository.get(username + "MemberCashDto");
+        MemberDto memberCashDto = (MemberDto) cashRepository.get("memberDto::" + username);
 
         if (memberCashDto != null) {
             List<GrantedAuthority> authorities = new ArrayList<>();
@@ -70,15 +70,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Member member = userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         // 레디스 저장
-        MemberCashDto dto = new MemberCashDto();
+        MemberDto dto = new MemberDto();
         dto.setUserEmail(member.getUserEmail());
         dto.setUserNo(member.getUserNo());
         dto.setPassword(member.getPassword());
         dto.setUserPhn(member.getUserPhn());
+        dto.setImgPath(member.getImgPath());
         dto.setUserName(member.getUserName());
         dto.setUserRole(member.getUserRole());
 
-        cashRepository.save(username + "MemberCashDto", dto);
+        cashRepository.save("memberDto::" + username, dto,3, TimeUnit.DAYS);
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_" + member.getUserRole()));

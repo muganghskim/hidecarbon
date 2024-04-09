@@ -28,6 +28,8 @@ public class Member {
 
     private String userRole;
 
+    private String imgPath;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -50,17 +52,20 @@ public class Member {
     }
 
     @Builder
-    public Member(String userEmail, String password, String userName, String userPhn, String userRole) {
+    public Member(String userEmail, String password, String userName, String userPhn, String userRole, String imgPath) {
         this.userEmail = userEmail;
         this.password = password;
         this.userName = userName;
         this.userPhn = userPhn;
         this.userRole = userRole;
+        this.imgPath = imgPath;
     }
 
-    public Member update(String userName) {
+    public Member update(String userName, String imgPath) {
         if (userName != null) {
             this.userName = userName;
+        }if (imgPath != null) {
+            this.imgPath = imgPath;
         }
         return this;
     }

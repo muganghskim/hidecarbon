@@ -28,6 +28,8 @@ public class Reward {
 
     private String rewardType;
 
+    private String imgPath;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -50,11 +52,12 @@ public class Reward {
     }
 
     @Builder
-    public Reward(Member adminMember, String description, float reqCo2e, String rewardType) {
+    public Reward(Member adminMember, String description, float reqCo2e, String rewardType, String imgPath) {
         this.adminMember = adminMember;
         this.description = description;
         this.reqCo2e = reqCo2e;
         this.rewardType = rewardType;
+        this.imgPath = imgPath;
     }
 
 
