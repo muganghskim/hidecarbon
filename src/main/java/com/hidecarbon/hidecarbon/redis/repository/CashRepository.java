@@ -1,14 +1,8 @@
 package com.hidecarbon.hidecarbon.redis.repository;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.hidecarbon.hidecarbon.mission.model.MissionDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.stereotype.Repository;
 
 import java.util.concurrent.TimeUnit;
