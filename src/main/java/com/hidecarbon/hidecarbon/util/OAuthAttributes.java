@@ -76,7 +76,7 @@ public class OAuthAttributes {
                 .userEmail(email)
                 .userName(name)
                 // Assuming picture is mapped to userPhn
-//                .userImg(picture)
+                .imgPath(picture)
                 .userPhn("defaultPhn")
                 // Default or placeholder values for other fields
                 .password(encodedPassword)
