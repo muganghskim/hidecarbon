@@ -11,7 +11,7 @@ public class MissionDto {
 
     private Long missionNo;
 
-    private Long userNo;
+//    private Long userNo;
 
     private String title;
 

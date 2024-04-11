@@ -35,6 +35,7 @@ public class MissionService {
     }
 
     // 미션 생성
+    // Todo : start end 변경
     @Transactional
     public void createMission(String userEmail, String title, String description, float co2e, String statDate, String endDate, String imgPath){
         Optional<Member> memberOpt = userRepository.findByUserEmail(userEmail);
@@ -93,7 +94,7 @@ public class MissionService {
             dto.setMissionNo(entity.getMissionNo());
             dto.setTitle(entity.getTitle());
             dto.setCo2e(entity.getCo2e());
-            dto.setUserNo(entity.getAdminMember().getUserNo());
+//            dto.setUserNo(entity.getAdminMember().getUserNo());
             dto.setStartDate(entity.getStartDate());
             dto.setEndDate(entity.getEndDate());
             dto.setCreatedAt(entity.getCreatedAt());

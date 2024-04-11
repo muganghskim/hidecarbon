@@ -1,5 +1,6 @@
 package com.hidecarbon.hidecarbon.mission.controller;
 
+import com.hidecarbon.hidecarbon.file.service.StorageService;
 import com.hidecarbon.hidecarbon.mission.model.MissionDto;
 import com.hidecarbon.hidecarbon.mission.service.MissionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -18,9 +20,12 @@ import org.springframework.web.bind.annotation.*;
 public class MissionController {
     private final MissionService missionService;
 
+    private final StorageService storageService;
+
     @Autowired
-    public MissionController(MissionService missionService) {
+    public MissionController(MissionService missionService, StorageService storageService) {
         this.missionService = missionService;
+        this.storageService = storageService;
     }
 
     @GetMapping("/mission/all")
@@ -29,13 +34,19 @@ public class MissionController {
         return missionService.getMissionAll(pageable);
     }
 
-    // todo : requestPart로 바꾸기
     @PostMapping("/admin/mission/create")
     @Operation(summary = "mission 생성")
-    public ResponseEntity<?> createMission(@RequestBody MissionDto req){
+    public ResponseEntity<?> createMission(@RequestPart String userEmail,
+                                           @RequestPart String title,
+                                           @RequestPart String description,
+                                           @RequestPart float co2e,
+                                           @RequestPart String statDate,
+                                           @RequestPart String endDate,
+                                           @RequestPart(value = "file") MultipartFile file){
         try {
             // String userEmail, String title, String description, float co2e, String statDate, String endDate, String imgPath
-//            missionService.createMission(req.ge(), req.getQuestion());
+            String imgPath = storageService.storeFile(file);
+            missionService.createMission(userEmail, title, description, co2e, statDate, endDate, imgPath);
             return ResponseEntity.ok("200");
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
