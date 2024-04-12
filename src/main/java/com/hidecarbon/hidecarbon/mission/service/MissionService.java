@@ -6,12 +6,12 @@ import com.hidecarbon.hidecarbon.mission.repository.MissionRepository;
 import com.hidecarbon.hidecarbon.redis.repository.CashRepository;
 import com.hidecarbon.hidecarbon.user.model.Member;
 import com.hidecarbon.hidecarbon.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -78,7 +78,7 @@ public class MissionService {
 
     // 미션 조회
     // Todo : Page 객체를 때려 박았으나 실제 될지는 테스트 해봐야할듯...
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public Page<MissionDto> getMissionAll(Pageable pageable){
 
         String missionsKey = "getMissionAll";
@@ -104,5 +104,76 @@ public class MissionService {
 
         cashRepository.save(missionsKey, missionDtos, 3, TimeUnit.DAYS); // 캐시에 데이터 저장
         return missionDtos;
+    }
+
+    // 미션 하나 조회
+    @Transactional(readOnly = true)
+    public MissionDto getMission(Long missionNo){
+
+        String missionKey = "getMission::" + missionNo;
+        MissionDto cashedMission = (MissionDto) cashRepository.get(missionKey);
+
+        if(cashedMission != null) {
+            return cashedMission;
+        }
+
+        Optional<Mission> missionOptional = missionRepository.findById(missionNo);
+        if (!missionOptional.isPresent()) {
+            throw new RuntimeException("미션을 찾을 수 없습니다.");
+        }
+        Mission mission = missionOptional.get();
+        MissionDto dto = new MissionDto();
+        dto.setMissionNo(mission.getMissionNo());
+        dto.setTitle(mission.getTitle());
+        dto.setDescription(mission.getDescription());
+        dto.setCo2e(mission.getCo2e());
+        dto.setStartDate(mission.getStartDate());
+        dto.setEndDate(mission.getEndDate());
+        dto.setCreatedAt(mission.getCreatedAt());
+        dto.setUpdatedAt(mission.getUpdatedAt());
+        dto.setImgPath(mission.getImgPath());
+
+        cashRepository.save(missionKey, dto, 3, TimeUnit.DAYS);
+
+        return dto;
+
+    }
+
+    // 미션 업데이트
+    @Transactional
+    public void updateMission(Long missionNo, String title, String description, float co2e, String statDate, String endDate, String imgPath){
+        // Todo : startDate 와 endDate 정의
+        String missionKey = "getMission::" + missionNo;
+        LocalDateTime updateDate = LocalDateTime.now();
+        Optional<Mission> missionOptional = missionRepository.findById(missionNo);
+        if (!missionOptional.isPresent()) {
+            throw new RuntimeException("미션을 찾을 수 없습니다.");
+        }
+        Mission mission = missionOptional.get();
+        mission.setTitle(title);
+        mission.setDescription(description);
+        mission.setCo2e(co2e);
+        mission.setStartDate(updateDate);
+        mission.setEndDate(updateDate);
+        mission.setUpdatedAt(updateDate);
+        mission.setImgPath(imgPath);
+
+        missionRepository.save(mission);
+
+        // 캐시 초기화
+        cashRepository.remove(missionKey);
+
+        MissionDto dto = new MissionDto();
+        dto.setMissionNo(mission.getMissionNo());
+        dto.setTitle(mission.getTitle());
+        dto.setDescription(mission.getDescription());
+        dto.setCo2e(mission.getCo2e());
+        dto.setStartDate(mission.getStartDate());
+        dto.setEndDate(mission.getEndDate());
+        dto.setCreatedAt(mission.getCreatedAt());
+        dto.setUpdatedAt(mission.getUpdatedAt());
+        dto.setImgPath(mission.getImgPath());
+
+        cashRepository.save(missionKey, dto, 3, TimeUnit.DAYS);
     }
 }

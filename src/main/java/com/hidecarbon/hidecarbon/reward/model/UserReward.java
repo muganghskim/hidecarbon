@@ -28,6 +28,8 @@ public class UserReward {
 
     private LocalDateTime rewardDate;
 
+    private String status;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -50,10 +52,11 @@ public class UserReward {
     }
 
     @Builder
-    public UserReward(Member normalMember, Reward reward, LocalDateTime rewardDate) {
+    public UserReward(Member normalMember, Reward reward, LocalDateTime rewardDate, String status) {
         this.normalMember = normalMember;
         this.reward = reward;
         this.rewardDate = rewardDate;
+        this.status = status;
     }
 
 }

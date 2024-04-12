@@ -28,7 +28,7 @@ public class MissionCompletion {
 
     private LocalDateTime completeDate;
 
-    private float gainCo2e;
+    private String status;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -52,10 +52,10 @@ public class MissionCompletion {
     }
 
     @Builder
-    public MissionCompletion(Member normalMember, Mission mission, LocalDateTime completeDate, float gainCo2e) {
+    public MissionCompletion(Member normalMember, Mission mission, LocalDateTime completeDate, String status) {
         this.normalMember = normalMember;
         this.mission = mission;
         this.completeDate = completeDate;
-        this.gainCo2e = gainCo2e;
+        this.status = status;
     }
 }
