@@ -117,11 +117,11 @@ public class MissionService {
             return cashedMission;
         }
 
-        Optional<Mission> missionOptional = missionRepository.findById(missionNo);
-        if (!missionOptional.isPresent()) {
+        Optional<Mission> missionOpt = missionRepository.findById(missionNo);
+        if (!missionOpt.isPresent()) {
             throw new RuntimeException("미션을 찾을 수 없습니다.");
         }
-        Mission mission = missionOptional.get();
+        Mission mission = missionOpt.get();
         MissionDto dto = new MissionDto();
         dto.setMissionNo(mission.getMissionNo());
         dto.setTitle(mission.getTitle());
@@ -145,11 +145,11 @@ public class MissionService {
         // Todo : startDate 와 endDate 정의
         String missionKey = "getMission::" + missionNo;
         LocalDateTime updateDate = LocalDateTime.now();
-        Optional<Mission> missionOptional = missionRepository.findById(missionNo);
-        if (!missionOptional.isPresent()) {
+        Optional<Mission> missionOpt = missionRepository.findById(missionNo);
+        if (!missionOpt.isPresent()) {
             throw new RuntimeException("미션을 찾을 수 없습니다.");
         }
-        Mission mission = missionOptional.get();
+        Mission mission = missionOpt.get();
         mission.setTitle(title);
         mission.setDescription(description);
         mission.setCo2e(co2e);
